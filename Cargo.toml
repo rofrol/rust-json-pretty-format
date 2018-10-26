@@ -1,0 +1,8 @@
+[package]
+name = "rust-json-pretty-format"
+version = "1.0.0"
+authors = ["Roman Frołow <rofrol@gmail.com>"]
+
+[dependencies]
+serde = "1.0.80"
+serde_json = "1.0.32"
