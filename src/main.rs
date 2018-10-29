@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<Error>> {
     let value: serde_json::Value = serde_json::from_reader(json_file)?;
     let data = serde_json::to_string_pretty(&value)?;
     let output_option = insert_segment_before_extension(".pretty.", &input);
-    if let Ok(output) = output_option {
+    if let Ok(output) = insert_segment_before_extension(".pretty.", &input) {
         fs::write(&output, data)?;
     } else {
         eprintln!("There was problem with generating output name");
