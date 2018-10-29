@@ -14,10 +14,10 @@ fn main() -> Result<(), Box<Error>> {
     let json_file = File::open(input).expect("file not found");
     let value: serde_json::Value = serde_json::from_reader(json_file).expect("error while reading json");
     let data = serde_json::to_string_pretty(&value).expect("Unable to pretty format json");
-    let canon = fs::canonicalize(&input).unwrap();
-    let canon_parent = Path::parent(&canon).unwrap();
-    let file_stem  = input.file_stem().unwrap();
-    let extension = input.extension().unwrap();
+    let canon = fs::canonicalize(&input)?;
+    let canon_parent = Path::parent(&canon).expect("Cannot get parent");
+    let file_stem  = input.file_stem().expect("Cannot get file_stem");
+    let extension = input.extension().expect("Cannot get extension");
     let output_option = file_stem.to_str()
         .map(|x:&str| x.to_owned() + ".pretty.")
         .and_then(|x:String| extension.to_str().and_then(|y:&str| Some(x + y)))
