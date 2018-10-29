@@ -27,9 +27,8 @@ fn insert_segment_before_extension(segment: &str, input: &Path) -> Result<PathBu
         .map(|x:&str| x.to_owned() + segment)
         .and_then(|x:String| extension.to_str().and_then(|y:&str| Some(x + y)))
         .map(|x:String| canon_parent.join(x));
-    if let Some(output) = output_option {
-        Ok(output)
-    } else {
-        Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, "There was a problem with generating output name")))
+    match output_option {
+        Some(output) => Ok(output),
+        None => Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, "There was a problem with generating output name"))),
     }
 }
