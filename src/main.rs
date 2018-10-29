@@ -26,7 +26,7 @@ fn insert_segment_before_extension(segment: &str, input: &Path) -> Result<PathBu
     let output_option = file_stem
         .to_str()
         .map(|x: &str| x.to_owned() + segment)
-        .and_then(|x: String| extension.to_str().and_then(|y: &str| Some(x + y)))
+        .and_then(|x: String| extension.to_str().map(|y: &str| x + y))
         .map(|x: String| canon_parent.join(x));
     match output_option {
         Some(output) => Ok(output),
