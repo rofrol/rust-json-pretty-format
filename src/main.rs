@@ -15,7 +15,6 @@ fn main() -> Result<(), Box<Error>> {
     let json_file = File::open(input)?;
     let value: serde_json::Value = serde_json::from_reader(json_file)?;
     let data = serde_json::to_string_pretty(&value)?;
-    let output_option = insert_segment_before_extension(".pretty.", &input);
     if let Ok(output) = insert_segment_before_extension(".pretty.", &input) {
         fs::write(&output, data)?;
     } else {
@@ -37,6 +36,6 @@ fn insert_segment_before_extension(segment: &str, input: &Path) -> Result<PathBu
     if let Some(output) = output_option {
         Ok(output)
     } else {
-        Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, "There was problem with generating output name")))
+        Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, "There was a problem with generating output name")))
     }
 }
