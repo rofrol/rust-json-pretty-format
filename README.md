@@ -1,8 +1,8 @@
 Simple json pretty formatter in Rust.
 
-`cargo run`
+`cargo run -- file.json`
 
-It will take `input.json` and write to `output.json`.
+It will write output to `file.pretty.json`.
 
 ## Links
 
