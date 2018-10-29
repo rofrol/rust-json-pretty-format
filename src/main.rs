@@ -6,7 +6,6 @@ use std::path::Path;
 use std::fs;
 use std::env;
 use std::error::Error;
-use std::process;
 use std::path::PathBuf;
 
 fn main() -> Result<(), Box<Error>> {
@@ -15,13 +14,8 @@ fn main() -> Result<(), Box<Error>> {
     let json_file = File::open(input)?;
     let value: serde_json::Value = serde_json::from_reader(json_file)?;
     let data = serde_json::to_string_pretty(&value)?;
-    if let Ok(output) = insert_segment_before_extension(".pretty.", &input) {
-        fs::write(&output, data)?;
-    } else {
-        eprintln!("There was problem with generating output name");
-        process::exit(1);
-    }
-    Ok(())
+    insert_segment_before_extension(".pretty.", &input)
+        .and_then(|output| Ok(fs::write(&output, data)?))
 }
 
 fn insert_segment_before_extension(segment: &str, input: &Path) -> Result<PathBuf, Box<Error>> {
