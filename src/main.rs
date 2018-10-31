@@ -9,6 +9,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 fn main() -> Result<(), Box<Error>> {
+    // TODO: Support stdin
     let args: Vec<String> = env::args().collect();
     let input = Path::new(&args[1]);
     let json_file = File::open(input)?;
@@ -36,6 +37,7 @@ fn insert_segment_before_extension(segment: &str, input: &Path) -> Result<PathBu
             )))
         }).map(|x: &str| x.to_owned() + segment)
         .and_then(|x: String| {
+            // TODO: What if there is no extension?
             input
                 .extension()
                 .ok_or(Box::new(std::io::Error::new(
