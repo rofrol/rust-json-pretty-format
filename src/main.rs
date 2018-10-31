@@ -20,36 +20,38 @@ fn main() -> Result<(), Box<Error>> {
 
 fn insert_segment_before_extension(segment: &str, input: &Path) -> Result<PathBuf, Box<Error>> {
     let canon = fs::canonicalize(&input)?;
-    let canon_parent_result = Path::parent(&canon).ok_or(Box::new(std::io::Error::new(
-        std::io::ErrorKind::Other,
-        "Cannot get parent",
-    )));
-    let file_stem_result = input.file_stem().ok_or(Box::new(std::io::Error::new(
-        std::io::ErrorKind::Other,
-        "Cannot get file_stem",
-    )));
-    let extension_result = input.extension().ok_or(Box::new(std::io::Error::new(
-        std::io::ErrorKind::Other,
-        "Cannot get extension",
-    )));
     // expected trait std::error::Error, found struct `std::io::Error`
     // Ok(Command...?) converts between errors
     // https://stackoverflow.com/questions/48430836/rust-proper-error-handling-auto-convert-from-one-error-type-to-another-with-que/48431339#48431339
     // https://github.com/rust-lang-nursery/error-chain/issues/119#issuecomment-274957996
-    Ok(file_stem_result
-        .and_then(|file_stem| {
+    Ok(input
+        .file_stem()
+        .ok_or(Box::new(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Cannot get file_stem",
+        ))).and_then(|file_stem| {
             file_stem.to_str().ok_or(Box::new(std::io::Error::new(
                 std::io::ErrorKind::Other,
                 "Failed on file_stem.to_str()",
             )))
         }).map(|x: &str| x.to_owned() + segment)
         .and_then(|x: String| {
-            extension_result
-                .and_then(|extension| {
+            input
+                .extension()
+                .ok_or(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    "Cannot get extension",
+                ))).and_then(|extension| {
                     extension.to_str().ok_or(Box::new(std::io::Error::new(
                         std::io::ErrorKind::Other,
                         "Failed on extension.to_str()",
                     )))
                 }).map(|y: &str| x + y)
-        }).and_then(|x: String| canon_parent_result.map(|canon_parent| canon_parent.join(x)))?)
+        }).and_then(|x: String| {
+            Path::parent(&canon)
+                .ok_or(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    "Cannot get parent",
+                ))).map(|canon_parent| canon_parent.join(x))
+        })?)
 }
