@@ -12,20 +12,24 @@ fn main() -> Result<(), Box<Error>> {
     // TODO: Support stdin
     let args: Vec<String> = env::args().collect();
     let input = Path::new(&args[1]);
-    let json_file = File::open(input)?;
+
+    let current = env::current_dir()?;
+    let canon = fs::canonicalize(&input)?;
+    let input_absolute = current.join(&canon);
+
+    let json_file = File::open(&input_absolute)?;
     let value: serde_json::Value = serde_json::from_reader(json_file)?;
     let data = serde_json::to_string_pretty(&value)?;
-    insert_segment_before_extension(".pretty.", &input)
+    insert_segment_before_extension(".pretty.", &input_absolute)
         .and_then(|output| Ok(fs::write(&output, data)?))
 }
 
-fn insert_segment_before_extension(segment: &str, input: &Path) -> Result<PathBuf, Box<Error>> {
-    let canon = fs::canonicalize(&input)?;
+fn insert_segment_before_extension(segment: &str, input_absolute: &Path) -> Result<PathBuf, Box<Error>> {
     // expected trait std::error::Error, found struct `std::io::Error`
     // Ok(Command...?) converts between errors
     // https://stackoverflow.com/questions/48430836/rust-proper-error-handling-auto-convert-from-one-error-type-to-another-with-que/48431339#48431339
     // https://github.com/rust-lang-nursery/error-chain/issues/119#issuecomment-274957996
-    Ok(input
+    Ok(input_absolute
         .file_stem()
         .ok_or(Box::new(std::io::Error::new(
             std::io::ErrorKind::Other,
@@ -38,7 +42,7 @@ fn insert_segment_before_extension(segment: &str, input: &Path) -> Result<PathBu
         }).map(|x: &str| x.to_owned() + segment)
         .and_then(|x: String| {
             // TODO: What if there is no extension?
-            input
+            input_absolute
                 .extension()
                 .ok_or(Box::new(std::io::Error::new(
                     std::io::ErrorKind::Other,
@@ -50,10 +54,10 @@ fn insert_segment_before_extension(segment: &str, input: &Path) -> Result<PathBu
                     )))
                 }).map(|y: &str| x + y)
         }).and_then(|x: String| {
-            Path::parent(&canon)
+            Path::parent(&input_absolute)
                 .ok_or(Box::new(std::io::Error::new(
                     std::io::ErrorKind::Other,
                     "Cannot get parent",
-                ))).map(|canon_parent| canon_parent.join(x))
+                ))).map(|parent| parent.join(x))
         })?)
 }
